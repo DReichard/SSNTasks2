@@ -24,6 +24,9 @@ namespace Task1
         [Verb("encrypt", HelpText = "Encrypt file.")]
         public class EncryptOptions
         {
+            [Option('p', "password", Required = true)]
+            public string Password { get; set; }
+
             [Option('f', "file", Required = true)]
             public string FilePath { get; set; }
 
@@ -45,6 +48,9 @@ namespace Task1
 
             [Option('c', "certificate", Required = true)]
             public string CertificatePath { get; set; }
+
+            [Option('p', "password", Required = true)]
+            public string Password { get; set; }
         }
     }
 }

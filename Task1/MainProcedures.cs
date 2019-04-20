@@ -4,6 +4,8 @@ using static Task1.Options;
 using System.Security.Cryptography;
 using System.Net;
 using System.IO;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace Task1
 {
@@ -44,6 +46,33 @@ namespace Task1
         {
             try
             {
+                var collection = new X509Certificate2Collection();
+                collection.Import(opts.CertificatePath, opts.Password, X509KeyStorageFlags.PersistKeySet);
+                var cert = collection[0];
+                var data = File.ReadAllText(opts.FilePath);
+
+                var tdes = new TripleDESCryptoServiceProvider();
+                tdes.GenerateKey();
+                var encryptor = tdes.CreateEncryptor();
+                byte[] encData;
+                using (var msEncrypt = new MemoryStream())
+                {
+                    using (var csEncrypt = new CryptoStream(msEncrypt, encryptor, CryptoStreamMode.Write))
+                    {
+                        using (StreamWriter swEncrypt = new StreamWriter(csEncrypt))
+                        {
+                            swEncrypt.Write(data);
+                        }
+                        encData = msEncrypt.ToArray();
+                    }
+                }
+                using (var rsa = cert.GetRSAPublicKey())
+                {
+                    var encryptedKey =  rsa.Encrypt(tdes.Key, RSAEncryptionPadding.OaepSHA1);
+                    var encryptedIV = rsa.Encrypt(tdes.IV, RSAEncryptionPadding.OaepSHA1);
+                    var dataTotal = encData.Concat(encryptedKey).Concat(encryptedIV).ToArray();
+                    File.WriteAllBytes(opts.Output, dataTotal);
+                }
             }
             catch (Exception e)
             {
@@ -56,6 +85,34 @@ namespace Task1
         {
             try
             {
+                var collection = new X509Certificate2Collection();
+                collection.Import(opts.CertificatePath, opts.Password, X509KeyStorageFlags.PersistKeySet);
+                var cert = collection[0];
+                var encryptedTotal = File.ReadAllBytes(opts.FilePath);
+                var simmKeyIVEncrypted = encryptedTotal.Skip(Math.Max(0, encryptedTotal.Count() - 512)).ToArray();
+                var simmKeyEncrypted = simmKeyIVEncrypted.Take(256).ToArray();
+                var simmIVEncrypted = simmKeyIVEncrypted.Skip(256).ToArray();
+                using (var rsa = cert.GetRSAPrivateKey())
+                {
+                    var decryptedKey = rsa.Decrypt(simmKeyEncrypted, RSAEncryptionPadding.OaepSHA1);
+                    var decryptedIV = rsa.Decrypt(simmIVEncrypted, RSAEncryptionPadding.OaepSHA1);
+                    var tdes = new TripleDESCryptoServiceProvider();
+                    tdes.Key = decryptedKey;
+                    tdes.IV = decryptedIV;
+                    var decryptor = tdes.CreateDecryptor();
+                    var payload = encryptedTotal.Take(encryptedTotal.Count() - 512).ToArray();
+                    using (var msDecrypt = new MemoryStream(payload))
+                    {
+                        using (var csDecrypt = new CryptoStream(msDecrypt, decryptor, CryptoStreamMode.Read))
+                        {
+                            using (var srDecrypt = new StreamReader(csDecrypt))
+                            {
+                                var res = srDecrypt.ReadToEnd();
+                                File.WriteAllText(opts.Output, res);
+                            }
+                        }
+                    }
+                }
             }
             catch (Exception e)
             {
