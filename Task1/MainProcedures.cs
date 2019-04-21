@@ -59,7 +59,7 @@ namespace Task1
                 {
                     using (var csEncrypt = new CryptoStream(msEncrypt, encryptor, CryptoStreamMode.Write))
                     {
-                        using (StreamWriter swEncrypt = new StreamWriter(csEncrypt))
+                        using (var swEncrypt = new StreamWriter(csEncrypt))
                         {
                             swEncrypt.Write(data);
                         }
@@ -96,9 +96,11 @@ namespace Task1
                 {
                     var decryptedKey = rsa.Decrypt(simmKeyEncrypted, RSAEncryptionPadding.OaepSHA1);
                     var decryptedIV = rsa.Decrypt(simmIVEncrypted, RSAEncryptionPadding.OaepSHA1);
-                    var tdes = new TripleDESCryptoServiceProvider();
-                    tdes.Key = decryptedKey;
-                    tdes.IV = decryptedIV;
+                    var tdes = new TripleDESCryptoServiceProvider
+                    {
+                        Key = decryptedKey,
+                        IV = decryptedIV
+                    };
                     var decryptor = tdes.CreateDecryptor();
                     var payload = encryptedTotal.Take(encryptedTotal.Count() - 512).ToArray();
                     using (var msDecrypt = new MemoryStream(payload))
@@ -123,15 +125,15 @@ namespace Task1
 
         private static byte[] BuildSelfSignedServerCertificate(string password)
         {
-            SubjectAlternativeNameBuilder sanBuilder = new SubjectAlternativeNameBuilder();
+            var sanBuilder = new SubjectAlternativeNameBuilder();
             sanBuilder.AddIpAddress(IPAddress.Loopback);
             sanBuilder.AddIpAddress(IPAddress.IPv6Loopback);
             sanBuilder.AddDnsName("localhost");
             sanBuilder.AddDnsName(Environment.MachineName);
 
-            X500DistinguishedName distinguishedName = new X500DistinguishedName($"CN=SSNCert1");
+            var distinguishedName = new X500DistinguishedName($"CN=SSNCert1");
 
-            using (RSA rsa = RSA.Create(2048))
+            using (var rsa = RSA.Create(2048))
             {
                 var request = new CertificateRequest(distinguishedName, rsa, HashAlgorithmName.SHA256, RSASignaturePadding.Pkcs1);
 
@@ -154,15 +156,15 @@ namespace Task1
 
         private static byte[] BuildSignedServerCertificate(string password, X509Certificate2 issuer)
         {
-            SubjectAlternativeNameBuilder sanBuilder = new SubjectAlternativeNameBuilder();
+            var sanBuilder = new SubjectAlternativeNameBuilder();
             sanBuilder.AddIpAddress(IPAddress.Loopback);
             sanBuilder.AddIpAddress(IPAddress.IPv6Loopback);
             sanBuilder.AddDnsName("localhost");
             sanBuilder.AddDnsName(Environment.MachineName);
 
-            X500DistinguishedName distinguishedName = new X500DistinguishedName($"CN=SSNCert2");
+            var distinguishedName = new X500DistinguishedName($"CN=SSNCert2");
 
-            using (RSA rsa = RSA.Create(2048))
+            using (var rsa = RSA.Create(2048))
             {
                 var request = new CertificateRequest(distinguishedName, rsa, HashAlgorithmName.SHA256, RSASignaturePadding.Pkcs1);
 
@@ -175,7 +177,7 @@ namespace Task1
                 request.CertificateExtensions.Add(sanBuilder.Build());
                 var serial = 42;
                 var certificate = request.Create(issuer, new DateTimeOffset(DateTime.UtcNow), new DateTimeOffset(DateTime.UtcNow.AddDays(365)), BitConverter.GetBytes(serial));
-                certificate.FriendlyName = "SSNCert1";
+                certificate.FriendlyName = "SSNCert2";
 
                 return certificate.Export(X509ContentType.Pfx, password);
             }
