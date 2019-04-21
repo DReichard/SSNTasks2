@@ -32,8 +32,8 @@ namespace Task2
             [Option('c', "certificate", Required = true)]
             public string CertificatePath { get; set; }
 
-            //[Option('p', "password", Required = true)]
-            //public string Password { get; set; }
+            [Option('p', "password", Required = true)]
+            public string Password { get; set; }
         }
     }
 }

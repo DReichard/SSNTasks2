@@ -23,7 +23,7 @@ namespace Task2
                 var collection = new X509Certificate2Collection();
                 collection.Import(opts.CertificatePath, opts.Password, X509KeyStorageFlags.PersistKeySet);
                 var cert = collection[0];
-                using (var rsa = cert.GetRSAPrivateKey())
+                using (var rsa = cert.GetRSAPublicKey())
                 {
                     var encryptedHash = rsa.Encrypt(hash.GetBytes(), RSAEncryptionPadding.OaepSHA1);
                     File.WriteAllBytes(opts.Output, encryptedHash);
@@ -44,9 +44,9 @@ namespace Task2
                 var hashProvider = HashFactory.Crypto.CreateMD4();
                 var actualHash = Convert.ToBase64String(hashProvider.ComputeBytes(content).GetBytes());
                 var collection = new X509Certificate2Collection();
-                collection.Import(opts.CertificatePath);
+                collection.Import(opts.CertificatePath, opts.Password, X509KeyStorageFlags.PersistKeySet);
                 var cert = collection[0];
-                using (var rsa = cert.GetRSAPublicKey())
+                using (var rsa = cert.GetRSAPrivateKey())
                 {
                     var signature = File.ReadAllBytes(opts.Signature);
                     var decryptedHash = Convert.ToBase64String(rsa.Decrypt(signature, RSAEncryptionPadding.OaepSHA1));
