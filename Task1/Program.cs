@@ -10,10 +10,9 @@ namespace Task1
         static int Main(string[] args)
         {
             Thread.CurrentThread.CurrentUICulture = new CultureInfo("en-us");
-            return Parser.Default.ParseArguments<MakeSelfCertOptions, MakeCertOptions, EncryptOptions, DecryptOptions>(args)
+            return Parser.Default.ParseArguments<MakeSelfCertOptions, EncryptOptions, DecryptOptions>(args)
                 .MapResult(
                   (MakeSelfCertOptions opts) => MainProcedures.RunMakeSelfCert(opts),
-                  (MakeCertOptions opts) => MainProcedures.RunMakeCert(opts),
                   (EncryptOptions opts) => MainProcedures.RunEncrypt(opts),
                   (DecryptOptions opts) => MainProcedures.RunDecrypt(opts),
                   errs => 1);

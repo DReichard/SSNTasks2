@@ -11,16 +11,6 @@ namespace Task1
             public string Password { get; set; }
         }
 
-        [Verb("makecert", HelpText = "Make certificate.")]
-        public class MakeCertOptions
-        {
-            [Option('p', "password", Required = true)]
-            public string Password { get; set; }
-
-            [Option('c', "certificate", Required = true)]
-            public string CertificatePath { get; set; }
-        }
-
         [Verb("encrypt", HelpText = "Encrypt file.")]
         public class EncryptOptions
         {
