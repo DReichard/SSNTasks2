@@ -14,15 +14,18 @@ namespace Task4
         {
             var a = -1;
             var mod = 751;
-            var p = (58, 139);
-            var q = (67, 667);
-            var r = (82, 481);
+            var p = (62, 372);
+            var q = (70, 195);
+            var r = (67, 84);
             var rmin = (r.Item1, -r.Item2);
 
             var buf1 = p.Double(a, mod);
             var buf2 = q.Double(a, mod).Add(q, mod);
             var buf3 = rmin;
             var res = buf1.Add(buf2, mod).Add(buf3, mod);
+            //446 227
+            //612, 329
+            //517, 178
         }
         
     }
