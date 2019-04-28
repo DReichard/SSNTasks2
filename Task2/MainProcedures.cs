@@ -6,6 +6,7 @@ using System.IO;
 using System.Collections.Generic;
 using System.Linq;
 using HashLib;
+using System.Text;
 
 namespace Task2
 {
@@ -50,10 +51,16 @@ namespace Task2
                 {
                     var signature = File.ReadAllBytes(opts.Signature);
                     var decryptedHash = Convert.ToBase64String(rsa.Decrypt(signature, RSAEncryptionPadding.OaepSHA1));
+                    Console.WriteLine($"Content: {Encoding.UTF8.GetString(content)}");
                     Console.WriteLine($"Provided Hash: {decryptedHash}");
                     Console.WriteLine($"Actual Hash: {actualHash}");
                     Console.WriteLine($"Equality: {actualHash == decryptedHash}");
-
+                    content[5] = 0x9;
+                    Console.WriteLine($"Content: {Encoding.UTF8.GetString(content)}");
+                    Console.WriteLine($"Provided Hash: {decryptedHash}");
+                    actualHash = Convert.ToBase64String(hashProvider.ComputeBytes(content).GetBytes());
+                    Console.WriteLine($"Actual Hash: {actualHash}");
+                    Console.WriteLine($"Equality: {actualHash == decryptedHash}");
                 }
             }
             catch (Exception e)

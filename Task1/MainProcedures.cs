@@ -6,6 +6,7 @@ using System.Net;
 using System.IO;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 
 namespace Task1
 {
@@ -53,7 +54,10 @@ namespace Task1
                 {
                     var encryptedKey =  rsa.Encrypt(tdes.Key, RSAEncryptionPadding.OaepSHA1);
                     var encryptedIV = rsa.Encrypt(tdes.IV, RSAEncryptionPadding.OaepSHA1);
+                    Console.WriteLine($"Plaintext data: {data}");
+                    Console.WriteLine($"Encrypted data: {Encoding.UTF8.GetString(encData)}");
                     var dataTotal = encData.Concat(encryptedKey).Concat(encryptedIV).ToArray();
+                    Console.WriteLine($"Total data: {Encoding.UTF8.GetString(dataTotal)}");
                     File.WriteAllBytes(opts.Output, dataTotal);
                 }
             }
